@@ -224,7 +224,7 @@
   [handler]
   (fn [request respond raise]
     (letfn [(respond* [response]
-              (respond (update-in response [:session] dissoc :state)))
+              (respond (update-in response [:session] dissoc ::state)))
             (callback [response]
               (try (-> (receive-tokens request response)
                        (handler respond* raise))
@@ -271,7 +271,6 @@
       (throw (ex-info "invalid ID token"
                       {:error error
                        :id-token id-token}))
-      ;; TODO: Use [::tokens provider-key :parsed-id-token]?
       (assoc request ::id-token id-token))))
 
 (defn- wrap-validate-id-token
@@ -286,8 +285,12 @@
   "Redirects the user agent to the configured completion URI.  Used by the
    callback handler to complete the flow, but can also be used by hooks
    to skip authentication."
-  [request respond _raise]
-  (respond (resp/redirect (completion-uri request))))
+  [{::keys [tokens id-token] :as request} respond _raise]
+  (-> (resp/redirect (completion-uri request))
+      (assoc :session (assoc (:session request {})
+                             ::tokens tokens
+                             ::id-token id-token))
+      respond))
 
 ;;;; User Info
 
