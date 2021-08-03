@@ -1,0 +1,10 @@
+.build/
+.calva/
+.clj-kondo/.cache/
+.cpcache/
+.lsp/
+
+.nrepl-port
+.rebel_readline_history
+
+*.jar
