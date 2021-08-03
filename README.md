@@ -1,7 +1,14 @@
 # oidc-client-ring
 
-[Ring][ring] middleware that provides an [OpenID Connect (OIDC)][oidc]
-client / Relying Party (RP).
+[Ring][ring] middleware that acts as a [OpenID Connect (OIDC)][oidc] client.
+
+## Latest version
+
+No releases yet.
+
+## Related work
+
+* [ring-oauth2]
 
 ## License
 
@@ -12,6 +19,7 @@ Copyright &copy; 2021 [Ferdinand Beyer]
 
 [oidc]: https://openid.net/connect/
 [ring]: https://github.com/ring-clojure/ring
+[ring-oauth2]: https://github.com/weavejester/ring-oauth2
 
 [Ferdinand Beyer]: https://fbeyer.com
 [MIT License]: https://opensource.org/licenses/MIT
