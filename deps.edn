@@ -8,39 +8,41 @@
  :aliases
  {:test
   {:extra-paths ["test"]
-   :extra-deps
-   {http-kit.fake/http-kit.fake {:mvn/version "0.2.2"}
-    lambdaisland/kaocha {:mvn/version "1.0.829"}
-    lambdaisland/uri {:mvn/version "1.4.70"}
-    ring/ring-mock {:mvn/version "0.4.0"}}}
+   :extra-deps {http-kit.fake/http-kit.fake {:mvn/version "0.2.2"}
+                lambdaisland/kaocha {:mvn/version "1.0.829"}
+                lambdaisland/uri {:mvn/version "1.4.70"}
+                ring/ring-mock {:mvn/version "0.4.0"}}}
+
+  :test/run
+  {:main-opts ["-m" "kaocha.runner"]}
+
+  :test/watch
+  {:main-opts ["-m" "kaocha.runner"
+               "--watch" "--fail-fast" "--no-randomize"
+               "--plugin" ":kaocha.plugin/notifier"]}
 
   :dev
   {:extra-paths ["dev"]
-   :extra-deps
-   {clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}
-    org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
+   :extra-deps {clojure-term-colors/clojure-term-colors {:mvn/version "0.1.0"}
+                org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 
   :repl
-  {:extra-deps
-   {nrepl/nrepl {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.26.0"}
-    vlaaad/reveal {:mvn/version "1.3.209"}}
-   :main-opts
-   ["-m" "nrepl.cmdline"
-    "--middleware" "[vlaaad.reveal.nrepl/middleware,cider.nrepl/cider-middleware]"
-    "-i"]}
+  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}
+                cider/cider-nrepl {:mvn/version "0.26.0"}
+                vlaaad/reveal {:mvn/version "1.3.209"}}
+   :main-opts ["-m" "nrepl.cmdline"
+               "--middleware" "[vlaaad.reveal.nrepl/middleware,cider.nrepl/cider-middleware]"
+               "-i"]}
+  
+  ;; clojure -X:docs
+  :docs {:extra-deps {codox/codox {:mvn/version "0.10.7"}}
+         :exec-fn codox.main/generate-docs
+         :exec-args {:source-paths ["src"]
+                     :namespaces [oidc.client.ring]
+                     :output-path "docs"}}
 
-  :jar
-  {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.211"}}
-   :exec-fn hf.depstar/jar
-   :exec-args {:jar "oidc-client-ring.jar" :sync-pom true}}
-
-  :install
-  {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
-   :exec-fn deps-deploy.deps-deploy/deploy
-   :exec-args {:installer :local :artifact "oidc-client-ring.jar"}}
-
-  :deploy
-  {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
-   :exec-fn deps-deploy.deps-deploy/deploy
-   :exec-args {:installer :remote :artifact "oidc-client-ring.jar"}}}}
+  ;; clojure -T:build FN
+  :build
+  {:deps {io.github.clojure/tools.build {:git/tag "v0.1.7" :git/sha "8a3abc2"}
+          slipset/deps-deploy {:mvn/version "0.1.5"}}
+   :ns-default build}}}
