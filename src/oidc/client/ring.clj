@@ -83,17 +83,9 @@
 
 ;;;; JSON
 
-(defn- json? [headers]
-  (some-> (:content-type headers)
-          (str/includes? "json")))
-
 (defn- read-json [input]
   (with-open [reader (io/reader input)]
     (json/read reader :key-fn keyword)))
-
-(defn- parse-json-response [{:keys [headers body]}]
-  (when (json? headers)
-    (read-json body)))
 
 (defn- parse-jwt
   "Parses the payload of a JWT, ignoring header and signature."
@@ -102,6 +94,32 @@
       second
       codec/base64-decode
       read-json))
+
+;;;; HTTP
+
+(defn- json-content? [headers]
+  (some-> (:content-type headers)
+          (str/includes? "json")))
+
+(defn- parse-json-response [{:keys [headers body]}]
+  (when (json-content? headers)
+    (read-json body)))
+
+(defn- require-json [{:keys [error status] :as response}]
+  (cond
+    (some? error)
+    (throw (ex-info "network error" response))
+
+    ;; XXX - body will not be available any more
+    (>= status 300)
+    (throw (ex-info "http error"
+                    (assoc response :error ::invalid-status)))
+
+    :else
+    (if-let [json-body (parse-json-response response)]
+      json-body
+      (throw (ex-info "invalid response"
+                      (assoc response :error ::invalid-json))))))
 
 ;;;; Error Handling
 
@@ -202,23 +220,13 @@
       (as-> opts (http/post (:token-endpoint provider) opts callback))))
 
 (defn- receive-tokens
-  [request {:keys [error status] :as response}]
-  (cond
-    (some? error)
-    (throw (ex-info "network error" response))
-
-    ;; XXX - body will not be available any more
-    (>= status 300)
-    (throw (ex-info "http error"
-                    (assoc response :error ::invalid-status)))
-    :else
-    (if-let [tokens (parse-json-response response)]
-      ;; TODO: Validate structure
-      ;; TODO: Determine absolute expiry time
-      ;; TODO: Add provider-key?
-      (assoc request ::tokens tokens)
-      (throw (ex-info "invalid response"
-                      (assoc response :error ::invalid-json))))))
+  [request response]
+  (let [tokens (require-json response)]
+    ;; TODO: Validate structure (e.g. token_type MUST be 'Bearer')
+    ;; TODO: Determine absolute expiry time
+    ;; TODO: Could validate tokens right here.  Can validate access token
+    ;; with id token if at_hash claim is present.
+    (assoc request ::tokens tokens)))
 
 (defn- wrap-fetch-tokens
   [handler]
@@ -281,20 +289,61 @@
          (catch Exception e
            (raise e)))))
 
+;;;; User Info
+
+(defn- should-fetch-userinfo?
+  [{::keys [provider] :as request}]
+  (and (:userinfo-endpoint provider)
+       (prop request :fetch-userinfo?)))
+
+(defn- fetch-userinfo
+  [{::keys [provider tokens]} callback]
+  (-> {:client (force sni-client/default-client)
+       :as :stream
+       ;; XXX: Also accept application/jwt?
+       :headers {"Accept" "application/json"}
+       :oauth-token (:access_token tokens)}
+      (as-> opts (http/get (:userinfo-endpoint provider) opts callback))))
+
+(defn- receive-userinfo
+  [request response]
+  (let [userinfo (require-json response)]
+    ;; TODO: Validate!
+    (tap> [::userinfo userinfo])
+    (assoc request ::userinfo userinfo)))
+
+(defn- wrap-fetch-userinfo
+  [handler]
+  (fn [request respond raise]
+    (if (should-fetch-userinfo? request)
+      (fetch-userinfo request (fn [response]
+                                (try (-> (receive-userinfo request response)
+                                         (handler respond raise))
+                                     (catch Exception e
+                                       (raise e)))))
+      (handler request respond raise))))
+
+;;;; Completion
+
+(defn- update-session
+  "Updates the session after successful authentication.  Stores tokens,
+   parsed id-token and userinfo claims."
+  [session {::keys [tokens id-token]}]
+  ;; TODO: Add provider-key?
+  (assoc session
+         ::tokens tokens
+         ::id-token id-token))
+
 (defn completion-handler
   "Redirects the user agent to the configured completion URI.  Used by the
    callback handler to complete the flow, but can also be used by hooks
    to skip authentication."
-  [{::keys [tokens id-token] :as request} respond _raise]
-  (-> (resp/redirect (completion-uri request))
-      (assoc :session (assoc (:session request {})
-                             ::tokens tokens
-                             ::id-token id-token))
-      respond))
-
-;;;; User Info
-
-;; TODO
+  [{::keys [provider] :as request} respond _raise]
+  (let [update-fn (:update-session provider update-session)
+        session (update-fn (:session request {}) request)]
+    (-> (resp/redirect (completion-uri request))
+        (assoc :session session)
+        respond)))
 
 ;;;; Ring Handlers
 
@@ -354,7 +403,7 @@
   {:pre [(provider? provider)]}
   (-> (:callback-response-handler provider)
       (wrap-hook provider :userinfo-hook)
-      ;; TODO: fetch and validate user info
+      (wrap-fetch-userinfo)
       (wrap-hook provider :token-hook)
       (wrap-validate-id-token)
       (wrap-fetch-tokens)
@@ -403,6 +452,7 @@
    :validate-id-token? true
 
    ;; Whether to fetch user info.
+   ;; Can also be a function, taking the current request.
    :fetch-userinfo? true
 
    ;; Maximum acceptable clock skew when validating timestamps.
@@ -414,9 +464,15 @@
    ;:token-hook nil
    ;:userinfo-hook nil
 
+   ;; Function to update the session from the request after successful
+   ;; authentication.
+   ;:update-session nil
+
    ;; Handlers
    :authentication-response-handler authentication-response-handler
    :callback-response-handler completion-handler
+   ;; TODO
+   ;:error-handler error-handler
 
    ;; Timeout in milliseconds for requests
    :request-timeout (* 60 1000)})
