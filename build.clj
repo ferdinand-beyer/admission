@@ -56,5 +56,6 @@
   {:pre [(some? (System/getenv "CLOJARS_USERNAME"))
          (some? (System/getenv "CLOJARS_PASSWORD"))]}
   (d/deploy {:installer :remote
-             :sign-releases? true
-             :artifact jar-file}))
+             :artifact jar-file
+             :pom-file (format "%s/META-INF/maven/%s/%s/pom.xml"
+                               class-dir (namespace lib) (name lib))}))
