@@ -4,7 +4,21 @@
 
 ## Latest version
 
-No releases yet.
+Available from [Clojars][clojars].
+
+[![Clojars Project](https://img.shields.io/clojars/v/com.fbeyer/oidc-client-ring.svg)][clojars]
+
+### Clojure CLI/deps.edn
+
+```clojure
+com.fbeyer/oidc-client-ring {:mvn/version "VERSION"}
+```
+
+### Leiningen/Boot
+
+```clojure
+[com.fbeyer/oidc-client-ring "VERSION"]
+```
 
 ## Similar projects
 
