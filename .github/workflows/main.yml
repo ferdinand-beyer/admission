@@ -23,7 +23,9 @@ jobs:
         run: clojure -M:test:test/run
 
       - name: Build Jar
-        run: clojure -T:build jar
+        run: |
+          clojure -T:build jar
+          ls .build/*.jar
 
       - name: Deploy Jar
         if: ${{ startsWith(github.ref, 'refs/tags/') }}

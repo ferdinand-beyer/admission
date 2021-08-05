@@ -6,7 +6,7 @@
 
 No releases yet.
 
-## Related work
+## Similar projects
 
 * [ring-oauth2]
 
