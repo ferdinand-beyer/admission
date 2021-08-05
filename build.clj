@@ -1,12 +1,35 @@
 (ns build
-  (:require [clojure.tools.build.api :as b]
+  (:require [clojure.string :as str]
+            [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as d]))
 
 (def lib 'com.fbeyer/oidc-client-ring)
-(def version (format "0.0.%s" (b/git-count-revs nil)))
+(def base-version "0.0")
+
 (def class-dir ".build/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
+
+(defn- git-tag [{:keys [dir] :or {dir "."}}]
+  (let [{:keys [exit out]}
+        (b/process {:command-args ["git" "describe" "--tags"]
+                    :dir dir
+                    :out :capture
+                    :err :ignore})]
+    (when (zero? exit)
+      (str/trim-newline out))))
+
+(def version (if-let [tag (git-tag nil)]
+               (str/replace tag #"^v" "")
+               (format "%s.%s-%s" base-version (b/git-count-revs nil)
+                       (if (System/getenv "CI") "ci" "dev"))))
+
 (def jar-file (format ".build/%s-%s.jar" (name lib) version))
+
+(defn info [_]
+  (pr {:lib lib
+       :version version
+       :jar-file jar-file})
+  (newline))
 
 (defn clean [_]
   (b/delete {:path ".build"}))
