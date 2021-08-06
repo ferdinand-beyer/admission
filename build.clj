@@ -11,7 +11,7 @@
 
 (defn- git-tag [{:keys [dir] :or {dir "."}}]
   (let [{:keys [exit out]}
-        (b/process {:command-args ["git" "describe" "--exact-match"]
+        (b/process {:command-args ["git" "describe" "--tags" "--exact-match"]
                     :dir dir
                     :out :capture
                     :err :ignore})]
