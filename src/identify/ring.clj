@@ -309,7 +309,6 @@
   [request response]
   (let [userinfo (require-json response)]
     ;; TODO: Validate!
-    (tap> [::userinfo userinfo])
     (assoc request ::userinfo userinfo)))
 
 (defn- wrap-fetch-userinfo
