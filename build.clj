@@ -3,7 +3,7 @@
             [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as d]))
 
-(def lib 'com.fbeyer/oidc-client-ring)
+(def lib 'com.fbeyer/admission)
 (def base-version "0.0")
 
 (def class-dir ".build/classes")
@@ -11,7 +11,7 @@
 
 (defn- git-tag [{:keys [dir] :or {dir "."}}]
   (let [{:keys [exit out]}
-        (b/process {:command-args ["git" "describe" "--tags"]
+        (b/process {:command-args ["git" "describe" "--exact-match"]
                     :dir dir
                     :out :capture
                     :err :ignore})]

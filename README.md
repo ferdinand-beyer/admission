@@ -1,4 +1,4 @@
-# oidc-client-ring
+# admission
 
 [Ring][ring] middleware that acts as a [OpenID Connect (OIDC)][oidc] client.
 
@@ -6,18 +6,18 @@
 
 Available from [Clojars][clojars].
 
-[![Clojars Project](https://img.shields.io/clojars/v/com.fbeyer/oidc-client-ring.svg)][clojars]
+[![Clojars Project](https://img.shields.io/clojars/v/com.fbeyer/admission.svg)][clojars]
 
 ### Clojure CLI/deps.edn
 
 ```clojure
-com.fbeyer/oidc-client-ring {:mvn/version "VERSION"}
+com.fbeyer/admission {:mvn/version "VERSION"}
 ```
 
 ### Leiningen/Boot
 
 ```clojure
-[com.fbeyer/oidc-client-ring "VERSION"]
+[com.fbeyer/admission "VERSION"]
 ```
 
 ## Similar projects
@@ -29,7 +29,7 @@ com.fbeyer/oidc-client-ring {:mvn/version "VERSION"}
 Distributed under the [MIT License].  
 Copyright &copy; 2021 [Ferdinand Beyer]
 
-[clojars]: https://clojars.org/com.fbeyer/oidc-client-ring
+[clojars]: https://clojars.org/com.fbeyer/admission
 
 [oidc]: https://openid.net/connect/
 [ring]: https://github.com/ring-clojure/ring

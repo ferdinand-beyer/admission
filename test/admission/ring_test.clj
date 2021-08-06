@@ -1,18 +1,17 @@
-(ns oidc.client.ring-test
-  (:require [clojure.test :as test :refer [deftest is testing]]
-            [oidc.client.ring :as oidc]
+(ns admission.ring-test
+  (:require [admission.ring :as ring]
+            [clojure.data.json :as json]
+            [clojure.string :as str]
+            [clojure.test :as test :refer [deftest is testing]]
+            [lambdaisland.uri :as uri]
             [org.httpkit.fake :as fake :refer [with-fake-http]]
             [ring.mock.request :as mock]
-            [ring.util.response :as resp]
-            [clojure.data.json :as json]
             [ring.util.codec :as codec]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
-            [lambdaisland.uri :as uri :refer [uri]]))
+            [ring.util.response :as resp]))
 
 (def issuer "https://idp.test")
 
-(def client-id "oidc-client-ring")
+(def client-id "admission-test")
 
 (def provider-opts {:issuer issuer
                     :authorization-endpoint (str issuer "/auth")
@@ -53,7 +52,7 @@
 (deftest test-wrap-oidc
   (with-fake-http [(:token-endpoint provider-opts)
                    (json-response tokens)]
-    (let [handler (oidc/wrap-oidc dummy-handler profiles)]
+    (let [handler (ring/wrap-oidc dummy-handler profiles)]
 
       (testing "redirect to authorization endpoint"
         (let [resp (handler (mock/request :get "/auth"))
@@ -71,10 +70,10 @@
         (let [resp (handler (-> (mock/request :get "/cb")
                                 (assoc :query-params {"code" "temporary"
                                                       "state" "original"}
-                                       :session {::oidc/state "original"})))]
+                                       :session {::ring/state "original"})))]
           (is (= 302 (:status resp)))
           (is (= "http://localhost/" (get-in resp [:headers "Location"])))
-          (is (= #::oidc{:tokens tokens
+          (is (= #::ring{:tokens tokens
                          :id-token id-token-claims}
                  (:session resp)))
           ;
@@ -82,6 +81,3 @@
       ;
       )))
 
-(comment
-  (test-wrap-oidc)
-  )

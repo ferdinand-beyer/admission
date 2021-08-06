@@ -38,7 +38,7 @@
   :docs {:extra-deps {codox/codox {:mvn/version "0.10.7"}}
          :exec-fn codox.main/generate-docs
          :exec-args {:source-paths ["src"]
-                     :namespaces [oidc.client.ring]
+                     :namespaces [admission]
                      :output-path "docs"}}
 
   ;; clojure -T:build FN
