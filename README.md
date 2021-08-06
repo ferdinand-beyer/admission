@@ -1,23 +1,27 @@
-# admission
+# identify
 
-[Ring][ring] middleware that acts as a [OpenID Connect (OIDC)][oidc] client.
+Library to identify end users using the [OpenID Connect (OIDC)][oidc]
+protocol.
+
+Features:
+* [Ring][ring] middleware that acts as a [OpenID Connect (OIDC)][oidc] client.
 
 ## Latest version
 
 Available from [Clojars][clojars].
 
-[![Clojars Project](https://img.shields.io/clojars/v/com.fbeyer/admission.svg)][clojars]
+[![Clojars Project](https://img.shields.io/clojars/v/com.fbeyer/identify.svg)][clojars]
 
 ### Clojure CLI/deps.edn
 
 ```clojure
-com.fbeyer/admission {:mvn/version "VERSION"}
+com.fbeyer/identify {:mvn/version "VERSION"}
 ```
 
 ### Leiningen/Boot
 
 ```clojure
-[com.fbeyer/admission "VERSION"]
+[com.fbeyer/identify "VERSION"]
 ```
 
 ## Similar projects
@@ -29,7 +33,7 @@ com.fbeyer/admission {:mvn/version "VERSION"}
 Distributed under the [MIT License].  
 Copyright &copy; 2021 [Ferdinand Beyer]
 
-[clojars]: https://clojars.org/com.fbeyer/admission
+[clojars]: https://clojars.org/com.fbeyer/identify
 
 [oidc]: https://openid.net/connect/
 [ring]: https://github.com/ring-clojure/ring

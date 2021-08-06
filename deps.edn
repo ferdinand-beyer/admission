@@ -9,7 +9,7 @@
  {:test
   {:extra-paths ["test"]
    :extra-deps {http-kit.fake/http-kit.fake {:mvn/version "0.2.2"}
-                lambdaisland/kaocha {:mvn/version "1.0.829"}
+                lambdaisland/kaocha {:mvn/version "1.0.861"}
                 lambdaisland/uri {:mvn/version "1.4.70"}
                 ring/ring-mock {:mvn/version "0.4.0"}}}
 
@@ -38,7 +38,7 @@
   :docs {:extra-deps {codox/codox {:mvn/version "0.10.7"}}
          :exec-fn codox.main/generate-docs
          :exec-args {:source-paths ["src"]
-                     :namespaces [admission]
+                     :namespaces [identify.ring]
                      :output-path "docs"}}
 
   ;; clojure -T:build FN

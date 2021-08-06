@@ -1,8 +1,8 @@
-(ns admission.ring-test
-  (:require [admission.ring :as ring]
-            [clojure.data.json :as json]
+(ns identify.ring-test
+  (:require [clojure.data.json :as json]
             [clojure.string :as str]
             [clojure.test :as test :refer [deftest is testing]]
+            [identify.ring :as ring]
             [lambdaisland.uri :as uri]
             [org.httpkit.fake :as fake :refer [with-fake-http]]
             [ring.mock.request :as mock]
@@ -11,7 +11,7 @@
 
 (def issuer "https://idp.test")
 
-(def client-id "admission-test")
+(def client-id "identify-test")
 
 (def provider-opts {:issuer issuer
                     :authorization-endpoint (str issuer "/auth")

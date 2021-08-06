@@ -3,7 +3,7 @@
             [clojure.tools.build.api :as b]
             [deps-deploy.deps-deploy :as d]))
 
-(def lib 'com.fbeyer/admission)
+(def lib 'com.fbeyer/identify)
 (def base-version "0.0")
 
 (def class-dir ".build/classes")

@@ -1,4 +1,4 @@
-(ns admission.ring
+(ns identify.ring
   "OpenID Connect 1.0 Client
 
    Implements the Code Flow (OAuth2 Authorization Code Grant) for OpenID
